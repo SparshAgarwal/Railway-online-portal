@@ -1,0 +1,866 @@
+#include<iostream.h>
+#include<fstream.h>
+#include<ctype.h>
+#include<stdio.h>
+#include<string.h>
+#include<iomanip.h>
+#include<process.h>
+#include<conio.h>
+#include<stdlib.h>
+
+
+char* datetoday(int E,int F,int G)
+{char V[7][5]={"mon","tue","wed","thurs","fri","sat","sun"};
+int k,l,m,n;
+l=G-2013;
+m=(l+1)/4;
+switch(F)
+{case 1:n=E;
+			 break;
+ case 2:n=E+31;
+			 break;
+ case 3:n=E+59;
+			 break;
+ case 4:n=E+90;
+			 break;
+ case 5:n=E+120;
+			 break;
+ case 6:n=E+151;
+			 break;
+ case 7:n=E+181;
+			 break;
+ case 8:n=E+212;
+			 break;
+ case 9:n=E+243;
+			 break;
+ case 10:n=E+273;
+			 break;
+ case 11:n=E+304;
+			 break;
+ case 12:n=E+334;
+			 break;}
+
+ k=(l+m+n)%7;
+return V[k];}
+
+
+
+
+struct stops
+{char s[20],t1[20],t2[20];};
+
+
+struct date
+{int a,b,c;};
+
+struct UandP
+{char U[20],P[20];}U1;
+
+
+//*********************************************************************************************
+
+int VerifyUandP(char u[],char p[])
+{int f=0;
+ifstream infile("Usernames",ios::binary);
+do
+{infile.read((char*)&U1,sizeof(U1));
+if((!strcmp(U1.U,u))&&(!strcmp(U1.P,p)))
+f=1;}
+while((f==0)&&(infile));
+infile.close();
+return f;}
+
+int verifyU(char u[])
+{int f=0;
+ifstream infile("Usernames",ios::binary);
+do
+{infile.read((char*)&U1,sizeof(U1));
+if(!strcmp(U1.U,u))
+f=1;}
+while((f==0)&&(infile));
+infile.close();
+return f;}
+
+
+
+
+
+void AddUandP(char u[],char p[])
+{strcpy(U1.U,u);
+strcpy(U1.P,p);
+ofstream onfile("Usernames",ios::app);
+onfile.write((char*)&U1,sizeof(U1));}
+
+
+
+
+
+//**************************************************************************************************
+//train input and functions
+
+
+
+class train
+{public:
+int number,availability,N1,mo;
+char name[20];
+char days[10][10];
+stops st[5];
+void w();
+void read();
+void inputinfo();
+void o();
+void s();
+void d();
+void in();
+void m();};
+
+void train::inputinfo()
+{int M=0;
+cout<<"\nName=";gets(name);
+cout<<"\nenter number of days in a weak it runs=";cin>>mo;
+for(M=0;M<mo;M++)
+gets(days[M]);
+cout<<"\nno of stops=";cin>>N1;
+cout<<"\nstop are=\n";
+for(M=0;M<N1;M++)
+{cout<<"\nenter name for this stop=";
+gets(st[M].s);
+cout<<"\nenter arrival and diparture for this stop=";
+gets(st[M].t1);
+gets(st[M].t2);}
+cout<<"\ntrain no=";cin>>number;
+cout<<"\navailability=";cin>>availability;}
+
+void train::o()
+{int i=0;
+cout<<"\n\nName=";cout<<name;
+cout<<"\nnumber of days in a weak it runs="<<mo<<"\n";
+for(i=0;i<mo;i++)
+cout<<days[i]<<",";
+cout<<"\nno of stops=";cout<<N1;
+cout<<"\n:::::::::::::::::::::::::::::::::::::::::::::::::::\n";
+cout<<":             ROUTE                               :\n";
+cout<<"station"<<"\t"<<"arrival"<<"\t"<<"departure\n";
+for(i=0;i<N1;i++)
+cout<<st[i].s<<"\t"<<st[i].t1<<"\t"<<st[i].t2<<"\n";
+cout<<"\ntrain no="<<number;
+cout<<"\navailability="<<availability;}
+
+void train::read()
+{cout<<"\ntrain information is=";
+train tn;
+ifstream infile("trainin.dat",ios::binary);
+while(infile.read((char*)&tn,sizeof(tn)))
+tn.o();
+infile.close();}
+
+
+void train::w()
+{ifstream jfile("trainin.dat",ios::binary);
+ofstream Jfile("tempt.dat",ios::binary);
+train tmn;int T,R=1;
+cout<<"\ntotal trains=";cin>>R;
+cout<<"\ninfo=";
+for(T=0;T<R;T++)
+{tmn.inputinfo();
+Jfile.write((char*)&tmn,sizeof(tmn));}
+remove("trainin.dat");
+rename("tempt.dat","trainin.dat");
+Jfile.close();
+jfile.close();}
+
+void train::in()
+{train s1,s2;
+int f=0;
+ifstream infile("trainin.dat",ios::binary);
+ofstream onfile("temp.dat",ios::binary);
+s2.inputinfo();
+while(infile.read((char*)&s1,sizeof(s1)))
+{if((s1.number>s2.number)&&(f==0))
+{onfile.write((char*)&s2,sizeof(s2));
+onfile.write((char*)&s1,sizeof(s1));
+f=1;}
+else
+onfile.write((char*)&s1,sizeof(s1));}
+if(f==0)
+onfile.write((char*)&s2,sizeof(s2));
+onfile.close();
+infile.close();
+remove("trainin.dat");
+rename("temp.dat","trainin.dat");}
+
+
+void train::d()
+{int f=0;
+ifstream infile("trainin.dat",ios::binary);
+ofstream onfile("temp.dat",ios::binary);
+train s2;
+int number;
+if(!infile)
+cout<<"\nFDE";
+else
+{cout<<"\nEnter number of train to be deleted=";
+cin>>number;
+while(infile.read((char*)&s2,sizeof(s2)))
+{if(s2.number!=number)
+onfile.write((char*)&s2,sizeof(s2));
+else
+f=1;}
+if(f==0)
+cout<<"\ntrain no does not exist";
+else
+{infile.close();
+onfile.close();
+remove("trainin.dat");
+rename("temp.dat","trainin.dat");}}}
+
+
+void train::m()
+{int f=0;
+ifstream infile("trainin.dat",ios::binary);
+ofstream onfile("temp.dat",ios::binary);
+train s1,s2;
+if(!infile)
+cout<<"\nFDE";
+else
+{cout<<"\nEnter info of train to be modified=";
+s1.inputinfo();
+l2:while(infile.read((char*)&s2,sizeof(s2)))
+{if((s1.number==s2.number)&&(f==0))
+{onfile.write((char*)&s1,sizeof(s1));
+f=1;goto l2;}
+onfile.write((char*)&s2,sizeof(s2));
+}
+if(f==0)
+cout<<"\ntrain no does not exist";
+else
+{infile.close();
+onfile.close();
+remove("trainin.dat");
+rename("temp.dat","trainin.dat");
+}}}
+
+
+void train::s()
+{li:int f=0;
+ifstream infile("trainin.dat",ios::binary|ios::out|ios::in);
+train s2;
+int number;
+if(!infile)
+cout<<"\nFDE";
+else
+{cout<<"\nEnter new info=";
+cin>>number;
+while(infile.read((char*)&s2,sizeof(s2)))
+{if((s2.number==number)&&(f==0))
+{s2.o();f=1;}}
+if(f==0)
+{cout<<"\ntrain no does not exist";goto li;}
+else
+{infile.close();
+}}}
+
+
+
+
+//passenger functions
+//**********************************************************************************************
+
+
+
+
+class passenger
+{public:
+int trainnumber,pnrnumber,age,charges,seatnumber;
+date D1;
+char name[20],sex[20],origin[20],destination[20],arrival[10],
+departure[10],type[20],trainname[20];
+void input();
+void output();};
+
+
+void passenger::input()
+{cout<<"\nName=";gets(name);
+cout<<"\nsex=";gets(sex);
+cout<<"\nage=";cin>>age;}
+
+void passenger::output()
+{cout<<"\n\nthe given passenger info is";
+cout<<"\npnr number="<<pnrnumber;
+cout<<"\ndate="<<D1.a<<"/"<<D1.b<<"/"<<D1.c;
+cout<<"\nname="<<name;
+cout<<"\nage="<<age;
+cout<<"\nsex="<<sex;
+cout<<"\norigin="<<origin;
+cout<<"\ndeparture from origin="<<departure;
+cout<<"\ndestination="<<destination;
+cout<<"\narrival at destination="<<arrival;
+cout<<"\ntrain number="<<trainnumber;
+cout<<"\ntrain name="<<trainname;
+cout<<"\nCLASS TYPE="<<type;
+cout<<"\ncharges="<<charges;}
+
+
+//*****************************************************************************************************
+
+
+
+passenger searchticket(char Book[])
+{passenger s7;
+int f=0,pnr;
+ifstream nfile(Book,ios::binary);
+do
+{cout<<"\nenter the pnr number to be cancelled=";cin>>pnr;
+while(nfile.read((char*)&s7,sizeof(s7))&&(f==0))
+if(s7.pnrnumber==pnr)
+f=1;
+if(f==0)
+cout<<"\npnr number does not exists";}
+while(f==0);
+
+return s7;}
+
+
+//*********************************************************************************************
+
+
+
+void writeoncancelfile(passenger s6,char Cancel[])
+{passenger s5;
+int M=0;
+ifstream nofile(Cancel,ios::binary);
+ofstream onfile("temp.dat",ios::binary);
+if(nofile)
+{while(nofile.read((char*)&s5,sizeof(s5)))
+{if((s5.pnrnumber>s6.pnrnumber)&&(M==0))
+{onfile.write((char*)&s6,sizeof(s6));
+onfile.write((char*)&s5,sizeof(s5));
+M=1;}
+else
+onfile.write((char*)&s5,sizeof(s5));}
+if(M==0)
+onfile.write((char*)&s6,sizeof(s6));}
+else
+onfile.write((char*)&s6,sizeof(s6));
+onfile.close();
+nofile.close();
+remove(Cancel);
+rename("temp.dat",Cancel);}
+
+
+
+//********************************************************************************************
+
+
+
+void deletefrombookingfile(passenger s2,char Book[])
+{ifstream infile(Book,ios::binary);
+ofstream ONfile("temp.dat",ios::binary);
+passenger s4;
+while(infile.read((char*)&s4,sizeof(s4)))
+if(s4.pnrnumber!=s2.pnrnumber)
+ONfile.write((char*)&s4,sizeof(s4));
+infile.close();
+ONfile.close();
+remove(Book);
+rename("temp.dat",Book);}
+
+
+
+
+
+//**************************************************************************************
+
+// function to decrease availability
+
+void decreaseavailability(int N)
+{int f=0;
+ifstream infile("trainin.dat",ios::binary);
+ofstream onfile("temp.dat",ios::binary);
+train s2;
+infile.read((char*)&s2,sizeof(s2));
+do
+{if((N==s2.number)&&(f==0))
+{s2.availability-=1;
+f=1;}
+onfile.write((char*)&s2,sizeof(s2));}
+while(infile.read((char*)&s2,sizeof(s2)));
+infile.close();
+onfile.close();
+remove("trainin.dat");
+rename("temp.dat","trainin.dat");}
+
+// availability decreased
+
+// function to increase availability
+void increaseavailability(int N)
+{int f=0;
+ifstream infile("trainin.dat",ios::binary);
+ofstream onfile("temp.dat",ios::binary);
+train s2;
+infile.read((char*)&s2,sizeof(s2));
+do
+{if((N==s2.number)&&(f==0))
+{s2.availability+=1;
+f=1;}
+onfile.write((char*)&s2,sizeof(s2));}
+while(infile.read((char*)&s2,sizeof(s2)));
+infile.close();
+onfile.close();
+remove("trainin.dat");
+rename("temp.dat","trainin.dat");}
+
+// availability increased
+
+//*************************************************************************************************
+
+
+
+
+void bookinghistory(char Book[],char Cancel[])
+{passenger G,G1;
+char h1,h2;
+ifstream infile(Book,ios::binary);
+if((!infile)||(infile.read((char*)&G,sizeof(G))=="\o"))
+cout<<"\nno booking history";
+else
+{infile.read((char*)&G,sizeof(G));
+while(infile)
+{G.output();
+cout<<"\nseat number="<<G.seatnumber;
+infile.read((char*)&G,sizeof(G));}
+infile.close();
+cout<<"\ndo you want to cancel an e-ticket[Y/N]=";cin>>h1;
+if(h1=='Y'||h1=='y')
+{G1=searchticket(Book);
+cout<<"\ndo you want to continue[Y/N]=";cin>>h2;
+if(h2=='Y'||h2=='y')
+{ifstream infile(Book,ios::binary);
+infile.read((char*)&G,sizeof(G));
+do
+{if(G1.pnrnumber==G.pnrnumber)
+{writeoncancelfile(G,Cancel);
+deletefrombookingfile(G,Book);
+increaseavailability(G.trainnumber);}}
+while(infile.read((char*)&G,sizeof(G)));
+cout<<"\nticket cancelled";}}
+infile.close();}}
+
+
+//***************************************************************************************
+
+
+void cancellinghistory(char can[])
+{passenger G;
+ifstream infile(can,ios::binary);
+if(!infile)
+cout<<"\nno cancelling history";
+else
+infile.read((char*)&G,sizeof(G));
+while(infile)
+{G.output();
+infile.read((char*)&G,sizeof(G));}
+infile.close();
+}
+
+// *************************************************************************************
+
+
+
+void fare()
+{cout<<setw(50)<<":::::::::::::::::::::::::::::::::::::::::::::::::::\n";
+cout<<setw(50)<<":     VARIOUS TYPES AND THEIR FARES ARE           :\n";
+cout<<setw(50)<<":::::::::::::::::::::::::::::::::::::::::::::::::::\n";
+cout<<setw(50)<<"       TYPE                                    FARE\n";
+cout<<setw(50)<<"1.    NON AC                                 Rs1000\n";
+cout<<setw(50)<<"2.   SLEEPER CLASS NON AC                    Rs1500\n";
+cout<<setw(50)<<"3.   SLEEPER CLASS AC                        Rs2000\n";
+cout<<setw(50)<<"4.   AC-3TIER                                Rs2500\n";
+cout<<setw(50)<<"5.   AC-2TIER                                Rs3000\n";
+cout<<setw(50)<<"*******************************************************\n";}
+
+
+//***********************************************************************************************
+
+void route()
+{int R,f=0,i;train T1;
+cout<<"\nenter train number to get route=";
+cin>>R;
+ifstream Infile("trainin.dat",ios::binary);
+Infile.read((char*)&T1,sizeof(T1));
+while((Infile)&&(f==0))
+{if(T1.number==R)
+{f=1;
+cout<<":::::::::::::::::::::::::::::::::::::::::::::::::::\n";
+cout<<":             ROUTE                               :\n";
+cout<<"station"<<"\t"<<"arrival"<<"\t"<<"departure\n";
+for(i=0;i<T1.N1;i++)
+cout<<T1.st[i].s<<"\t\t"<<T1.st[i].t1<<"\t"<<T1.st[i].t2<<"\n";}
+Infile.read((char*)&T1,sizeof(T1));}
+if(f==0)
+cout<<"\ntrain number is incorrect";
+Infile.close();}
+
+//**********************************************************************************
+
+//to write in Book file
+void entryinbookinghistory(passenger p,char BOOK[])
+{passenger s1;
+int T=0;
+ifstream Nfile(BOOK,ios::binary);
+ofstream Ofile("temp.dat",ios::binary);
+if(Nfile)
+{Nfile.read((char*)&s1,sizeof(s1));
+do
+{if((s1.pnrnumber>p.pnrnumber)&&(T==0))
+{Ofile.write((char*)&p,sizeof(p));
+Ofile.write((char*)&s1,sizeof(s1));
+T=1;}
+else
+Ofile.write((char*)&s1,sizeof(s1));}
+while(Nfile.read((char*)&s1,sizeof(s1)));
+if(T==0)
+Ofile.write((char*)&p,sizeof(p));}
+else
+Ofile.write((char*)&p,sizeof(p));
+Ofile.close();
+Nfile.close();
+remove(BOOK);
+rename("temp.dat",BOOK);}
+
+//written in file
+
+
+//*************************************************************************************************
+
+
+void bookticket(char BOOK[],char A[],char B[],date D2)
+{train TN,T;
+int N,i,f,n,r,charges,R;char type[20],X[20],Y[20],H;
+do
+{cout<<"\nenter train number to book ticket=";
+cin>>N;
+f=0;
+ifstream Gfile("trainin.dat",ios::binary|ios::in);
+Gfile.read((char*)&TN,sizeof(TN));
+while((Gfile) && (f==0))
+{
+	 if(TN.number==N)
+		  {f=1;
+		  T=TN;}
+	  Gfile.read((char*)&TN,sizeof(TN));
+	  }
+if (f==0)
+cout<<"\ntrain number incorrect";
+Gfile.close();}
+while(f==0);
+
+for(i=0;i<5;i++)
+{if(!strcmpi(T.st[i].s,A))
+strcpy(X,T.st[i].t2);
+if(!strcmpi(T.st[i].s,B))
+strcpy(Y,T.st[i].t1);}
+fare();
+do
+{cout<<"\nEnter valid train type[1/2/3/4/5]=";
+cin>>f;
+switch(f)
+{case 1:charges=1000;
+		 strcpy(type,"NON AC");
+		 break;
+case 2:charges=1500;
+		 strcpy(type,"SLEEPER CLASS NON AC");
+		 break;
+case 3:charges=2000;
+		 strcpy(type,"SLEEPER CLASS AC");
+		 break;
+case 4:charges=2500;
+		 strcpy(type,"AC 3TIER");
+		 break;
+case 5:charges=3000;
+		 strcpy(type,"AC 2TIER");
+		 break;
+default:cout<<"wrong input";}}
+while(!((f==1)||(f==2)||(f==3)||(f==4)||(f==5)));
+
+ofstream onfile(BOOK,ios::binary);
+cout<<"\nno. of passengers=";cin>>n;
+
+//input your info
+
+randomize();
+R=100+random(900);
+passenger p[5];
+i=0;
+while(i<n)
+{Z2:cout<<"\nenter passenger "<<(i+1)<<" information";
+p[i].D1=D2;
+p[i].input();
+p[i].trainnumber=N;
+p[i].pnrnumber=R;
+p[i].charges=charges;
+strcpy(p[i].origin,A);
+strcpy(p[i].destination,B);
+strcpy(p[i].arrival,Y);
+strcpy(p[i].departure,X);
+strcpy(p[i].type,type);
+strcpy(p[i].trainname,T.name);
+p[i].output();
+cout<<"\n1.if correct and want to confirm ";
+cout<<"\n2.if wrong and want to modify\n";
+cin>>r;
+switch(r)
+{case 1:i++;
+		  break;
+ case 2:goto Z2;
+ default:cout<<"\nwrong input";}}
+
+
+//info entered
+do
+{cout<<"\ndo you want to confirm your ticket[Y/N]=";cin>>H;
+switch(H)
+{case 'Y':for(i=0;i<n;i++)
+			 {decreaseavailability(N);
+			 p[i].seatnumber=101-T.availability;
+			 entryinbookinghistory(p[i],BOOK);}
+			 cout<<"\nticket confirmed";
+			 for(i=0;i<n;i++)
+			 {p[i].output();
+			 cout<<"\nseatnumber="<<p[i].seatnumber<<"\n";}
+			 break;
+ case 'N':break;
+default:cout<<"\nwrong input";}}
+while(!((H=='Y')||(H=='N')));}
+
+
+
+
+
+
+
+
+//******************************************************************************
+
+
+void planmytravel(char Bo[])
+{char A[20],B[20],Y[10],X[10];train t;
+date d;int i,j,f=0,x=-1,y=-1,Q;
+L1:cout<<"\nenter origin=";gets(A);
+cout<<"\nenter destination=";gets(B);
+cout<<"\nenter date=";cin>>d.a>>d.b>>d.c;
+char* C=datetoday(d.a,d.b,d.c);
+ifstream infile("trainin.dat",ios::binary);
+infile.read((char*)&t,sizeof(t));
+do
+{f=0;
+for(i=0;i<7;i++)
+if((strcmpi(C,t.days[i]))&&(f==0))
+{for(j=0;j<t.N1;j++)
+	 {if(!strcmpi(t.st[j].s,A))
+			{x=j;
+			strcpy(X,t.st[j].t2);}
+	  if(!strcmpi(t.st[j].s,B))
+			{y=j;
+			strcpy(Y,t.st[j].t1);}}
+if((x<y)&&(x!=-1)&&(y!=-1))
+{f=1;
+cout<<"\ntrain number="<<t.number;
+cout<<"\nname="<<t.name;
+cout<<"\narrival at destination="<<Y;
+cout<<"\ndeparture from origin="<<X;
+cout<<"\navailability="<<t.availability;}}
+infile.read((char*)&t,sizeof(t));}
+while(infile);
+infile.close();
+do
+{cout<<"\n1.to book any ticket";
+cout<<"\n2.to check any fare";
+cout<<"\n3.to check any route";
+cout<<"\n4.to return to previos menu\n";
+cin>>Q;
+switch(Q)
+{case 1:bookticket(Bo,A,B,d);
+		 break;
+case 2:fare();
+		 break;
+case 3:route();
+		 break;
+case 4:break;
+default:cout<<"\nwrong input";}}
+while(Q!=4);}
+
+//*********************************************************************************
+
+
+//*****************************************************************************************
+//******************************************************************************************
+
+void main()
+{A2:
+char user[40],Book[20],Cancel[20],pass[20],pass1[20],pass2[20],a[20];
+int g,f=0,i=0,j;
+cout<<"\n1.Have account\n";
+cout<<"2.sign in\n";
+cout<<"enter your choice\n";
+cin>>j;
+switch(j)
+{
+case 1:{cout<<"\nEnter Your USERNAME=";
+			gets(user);
+			cout<<"\nEnter Your PASSWORD(max 20 characters,after password press '*')=";
+				for(i=0;i<20;i++)
+				{a[i]=getch();
+                                                     cout<<'*';
+				if(a[i]=='*')
+				break;}
+				for(i=0;(i<20)&&(a[i]!='*');i++)
+				pass[i]=a[i];
+if((!strcmp(user,"M"))&&(!strcmp(pass,"L")))
+		  {train tm;char p;
+      A1:cout<<"\n1.to see info";
+			cout<<"\n2.to re enter trains";
+			cout<<"\n3.to modify train info";
+			cout<<"\n4.to delete train info";
+			cout<<"\n5.to insert train info";
+			cout<<"\n6.to search train info";
+			cout<<"\n7.to sign out";
+			cout<<"\nenter your chioce\n";
+			cin>>p;
+			switch(p)
+			{case '1':
+					tm.read();
+					goto A1;
+			 case '2':
+					tm.w();
+					goto A1;
+			 case '3':
+					tm.m();
+					goto A1;
+			 case '4':
+					tm.d();
+					goto A1;
+			 case '5':
+					tm.in();
+					goto A1;
+			 case '6':
+					tm.s();
+					goto A1;
+			 case '7':
+					goto A2;
+			 default:
+					cout<<"\nwrong input";
+					goto A1;}}
+
+else
+{f=VerifyUandP(user,pass);         //returns '0' if invalid else '1'
+if(f==0)
+{cout<<"\ninvalid username";
+goto A2;}
+strcpy(Book,user);
+strcat(Book,"book");
+strcpy(Cancel,user);
+strcat(Cancel,"cancel");
+int J;
+do{
+cout<<"\n1.PLAN MY TRAVEL\n";
+cout<<"\n2.BOOKING HISTORY\n";
+cout<<"\n3.CANCELLED HISTORY\n";
+cout<<"\n4.sign out";
+cout<<"\nEnter your choice\n";
+cin>>J;
+switch (J)
+{case 1:
+		planmytravel(Book);
+		break;
+case 2:
+		bookinghistory(Book,Cancel);
+		break;
+case 3:cancellinghistory(Cancel);
+		break;
+case 4:goto A2;
+default:cout<<"\nwrong input";}}
+while(J!=4);}
+break;}
+
+//*****************************************************
+//*****************************************************
+
+case 2:
+{do
+{cout<<"\nenter user name=";gets(user);
+f=verifyU(user);
+if(f==0)
+cout<<"\nuser name is available for use";
+else
+cout<<"\nuser name is already occupied";}
+while(f==1);
+strcpy(Book,user);
+strcat(Book,"book");
+strcpy(Cancel,user);
+strcat(Cancel,"cancel");
+do
+{cout<<"\nenter password(max 20 characters,after password press '*')=";
+			for(i=0;i<20;i++)
+			{a[i]=getch();
+			if(a[i]=='*')
+			break;}
+			for(i=0;(i<20)&&(a[i]!='*');i++)
+			pass1[i]=a[i];
+cout<<"\nre enterpassword(max 20 characters,after password press '*')=";
+			for(i=0;i<20;i++)
+			{a[i]=getch();
+			if(a[i]=='*')
+			break;}
+			for(i=0;(i<20)&&(a[i]!='*');i++)
+			pass2[i]=a[i];
+if(strcmp(pass1,pass2))
+cout<<"\npassword do not match";}
+while(strcmp(pass1,pass2));
+cout<<"\npassword match";
+char ch;
+cout<<"\ndo you want to comfirm your account[Y/N]=";cin>>ch;
+if(ch=='Y'||ch=='y')
+{AddUandP(user,pass1);
+int J;
+do{
+cout<<"\n1.PLAN MY TRAVEL\n";
+cout<<"\n2.BOOKING HISTORY\n";
+cout<<"\n3.CANCELLED HISTORY\n";
+cout<<"\n4.sign out";
+cout<<"\nEnter your choice";
+cin>>J;
+switch (J)
+{case 1:
+		planmytravel(Book);
+		break;
+case 2:
+		bookinghistory(Book,Cancel);
+		break;
+case 3:
+		cancellinghistory(Cancel);
+		break;
+case 4:goto A2;
+default:cout<<"\nwrong input";}}
+while(J!=4);}
+break;}
+
+default:cout<<"\nwrong input";
+		  goto A2;}}
+
+
+//***********************************************
+//***********************************************
+
+
+
+
+
+
+
+
+
+
+
+
